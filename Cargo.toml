@@ -1,6 +1,6 @@
 [package]
 name = "batcave"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Thembinkosi Mkhonta (thembinkosimkhonta01@gmail.com)"]
 edition = "2021"
 
@@ -16,6 +16,8 @@ include = ["src/**/*.rs", "Cargo.toml", "README.md"]
 colored = "2.0.0"
 log = "0.4"
 simple_logger = "4.0"
+rustyline = "10.0.0"
+simplelog = "0.12.0"
 
 [[bin]]
 name = "batcave"
