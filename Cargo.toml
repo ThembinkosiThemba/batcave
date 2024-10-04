@@ -1,0 +1,22 @@
+[package]
+name = "batcave"
+version = "0.1.0"
+authors = ["Thembinkosi Mkhonta (thembinkosimkhonta01@gmail.com)"]
+edition = "2021"
+
+description = "the Batcave Terminal, a mysterious and powerful command-line interface inspired by the Dark Knight's lair."
+license = "MIT"
+homepage = "https://github.com/ThembinkosiThemba/batcave"
+repository = "https://github.com/ThembinkosiThemba/batcave"
+readme = "README.md"
+keywords = ["terminal", "cmd", "batcave", "linux", "shell"]
+include = ["src/**/*.rs", "Cargo.toml", "README.md"]
+
+[dependencies]
+colored = "2.0.0"
+log = "0.4"
+simple_logger = "4.0"
+
+[[bin]]
+name = "batcave"
+path = "src/main.rs"
