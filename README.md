@@ -58,11 +58,11 @@ Contributions to the Batcave Terminal are welcome! Whether you're a billionaire 
 
 ## License
 
-This project is licensed under the "Wayne Enterprises Open Source Initiative" License - see the LICENSE file for details. (It's actually just the MIT License, but we think our name sounds cooler.)
+This project is licensed under the "Wayne Enterprises Open Source Initiative" License - see the [LICENSE](./LICENSE) file for details. (It's actually just the MIT License, but I think this name sounds cooler.)
 
 ## Acknowledgments
 
-- Inspired by the Caped Crusader himself
+- Inspired by the Caped Crusader himself and The Drive to Stop Bane
 - Built with Rust, forged in the shadows of Gotham
 - Tested on systems from the Batcave to the Justice League Watchtower
 
