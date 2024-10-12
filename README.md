@@ -1,12 +1,16 @@
 # The Batcave Terminal: Gotham's Command Center
 
-<p align="center">
-    <img src="./src/image.png" alt="Batcave entrance" />
+<p align="start">
+    <img src="./src/assets/image.png" alt="Batcave entrance" />
 </p>
 
 Holy command line, Batman! Welcome to the Batcave Terminal, a command-line interface that would make even Alfred proud. This Rust-based terminal emulator provides a unique, Batman-themed experience while offering essential file system navigation and manipulation capabilities. It's so secure, even the Riddler couldn't hack it!
 
 ## Features
+
+<p align="start">
+    <img src="./src/assets/info.png" alt="Batcave entrance" />
+</p>
 
 - 🦇 Bat-signal inspired ASCII art banner (may or may not summon Batman)
 - 🖤 Dark Knight theme with Bat-yellow output (Bruce Wayne approved)
