@@ -4,7 +4,7 @@ use colored::*;
 use log::error;
 
 use crate::{
-    shell::Shell, system::system_info, utils::{expand_env_vars, tokenize_command}
+    help::handle_help, shell::Shell, system::system_info, utils::{expand_env_vars, tokenize_command}
 };
 
 /// This function is used for processing and executing user commands
@@ -47,6 +47,7 @@ pub fn execute_command(command: &str, shell: &mut Shell) -> String {
             .collect::<Vec<_>>()
             .join("\n"),
         "info" => system_info(),
+        "help" => handle_help(&parts[1..]),
         _ => execute_external_command(&parts),
     }
 }

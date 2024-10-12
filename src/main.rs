@@ -6,6 +6,7 @@ mod commands;
 mod shell;
 mod system;
 mod utils;
+mod help;
 
 use crate::commands::execute_command;
 use crate::shell::{Shell, ShellHelper};
@@ -35,7 +36,7 @@ fn main() -> io::Result<()> {
     
     println!("{}", system_info());
     println!();
-    
+
     loop {
         let current_dir = env::current_dir()?;
         let prompt = format!("🦇 {}> ", current_dir.display())
