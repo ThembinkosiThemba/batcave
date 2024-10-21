@@ -70,7 +70,7 @@ impl Shell {
     }
 }
 
-// The ShellHelper struct is used for rustyline integration, 
+// The ShellHelper struct is used for rustyline integration,
 // providing auto-completion and other line editing features.
 pub struct ShellHelper {
     shell: Shell,

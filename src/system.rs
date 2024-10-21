@@ -14,7 +14,6 @@ pub fn system_info() -> String {
     let memory_usage = (used_memory as f64 / total_memory as f64) * 100.0;
 
     let mut info = String::new();
-    // System Overview
     info.push_str(&format!(
         "{}\n",
         "System Overview".bright_yellow().bold().underline()

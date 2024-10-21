@@ -22,9 +22,6 @@ use rustyline::{error::ReadlineError, Editor};
 fn main() -> io::Result<()> {
     setup_logging()?;
     print_banner();
-    println!();
-    println!();
-
     
     let mut shell = Shell::new();
     let helper = ShellHelper::new(&shell);

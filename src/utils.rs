@@ -43,10 +43,15 @@ pub fn setup_logging() -> io::Result<()> {
         .map_err(|e| IoError::new(io::ErrorKind::NotFound, e))?;
     let log_path = Path::new(&home_dir).join(".batcave.log");
 
+    let file = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(log_path)?;
+
     CombinedLogger::init(vec![WriteLogger::new(
         LevelFilter::Info,
         Config::default(),
-        fs::File::create(log_path)?,
+        file,
     )])
     .map_err(|e| IoError::new(io::ErrorKind::Other, e))?;
 

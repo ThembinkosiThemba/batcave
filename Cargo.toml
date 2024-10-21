@@ -1,6 +1,6 @@
 [package]
 name = "batcave"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Thembinkosi Mkhonta (thembinkosimkhonta01@gmail.com)"]
 edition = "2021"
 

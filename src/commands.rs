@@ -57,8 +57,8 @@ fn execute_external_command(parts: &[String]) -> String {
     command
         .args(&parts[1..])
         .stdin(Stdio::inherit())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit());
 
     match command.output() {
         Ok(output) => {
@@ -77,14 +77,14 @@ fn change_directory(path: Option<&&str>) -> String {
         Some(path) => {
             if let Err(e) = env::set_current_dir(path) {
                 error!("Failed to change directory: {}", e);
-                format!("Failed to change directory: {}", e)
+                format!("{}Failed to change directory: {}{}", "[".red(), e, "]".red())
             } else {
-                String::new()
+                format!("{}Changed to directory: {}{}", "[".green(), path, "]".green())
             }
         }
         None => {
             error!("cd: missing argument");
-            String::from("cd: missing argument")
+            format!("{}cd: missing argument{}", "[".red(), "]".red())
         }
     }
 }
@@ -97,7 +97,7 @@ fn list_directory(path: Option<&&str>) -> String {
             .map(|entry| {
                 let name = entry.file_name().to_string_lossy().into_owned();
                 if entry.file_type().map(|ft| ft.is_dir()).unwrap_or(false) {
-                    name.blue().to_string()
+                    format!("{}", name.blue())
                 } else {
                     name
                 }
@@ -106,7 +106,7 @@ fn list_directory(path: Option<&&str>) -> String {
             .join("  "),
         Err(e) => {
             error!("Failed to list directory: {}", e);
-            format!("Failed to list directory: {}", e)
+            format!("{}Failed to list directory: {}{}", "[".red(), e, "]".red())
         }
     }
 }
@@ -116,14 +116,14 @@ fn create_directory(path: Option<&&str>) -> String {
         Some(path) => {
             if let Err(e) = fs::create_dir(path) {
                 error!("Failed to create directory: {}", e);
-                format!("Failed to create directory: {}", e)
+                format!("{}Failed to create directory: {}{}", "[".red(), e, "]".red())
             } else {
-                format!("Directory created: {}", path)
+                format!("{}Directory created: {}{}", "[".green(), path, "]".green())
             }
         }
         None => {
             error!("mkdir: missing argument");
-            String::from("mkdir: missing argument")
+            format!("{}mkdir: missing argument{}", "[".red(), "]".red())
         }
     }
 }
@@ -135,22 +135,22 @@ fn remove_file_or_directory(path: Option<&&str>) -> String {
             if path.is_dir() {
                 if let Err(e) = fs::remove_dir_all(path) {
                     error!("Failed to remove directory: {}", e);
-                    format!("Failed to remove directory: {}", e)
+                    format!("{}Failed to remove directory: {}{}", "[".red(), e, "]".red())
                 } else {
-                    format!("Directory removed: {}", path.display())
+                    format!("{}Directory removed: {}{}", "[".green(), path.display(), "]".green())
                 }
             } else {
                 if let Err(e) = fs::remove_file(path) {
                     error!("Failed to remove file: {}", e);
-                    format!("Failed to remove file: {}", e)
+                    format!("{}Failed to remove file: {}{}", "[".red(), e, "]".red())
                 } else {
-                    format!("File removed: {}", path.display())
+                    format!("{}File removed: {}{}", "[".green(), path.display(), "]".green())
                 }
             }
         }
         None => {
             error!("rm: missing argument");
-            String::from("rm: missing argument")
+            format!("{}rm: missing argument{}", "[".red(), "]".red())
         }
     }
 }
