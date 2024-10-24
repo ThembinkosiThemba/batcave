@@ -18,9 +18,7 @@ pub fn execute_command(command: &str, shell: &mut Shell) -> String {
     shell.start_command_timer();
     let result = execute_command_internal(command, shell);
     if let Some(duration) = shell.end_command_timer() {
-        if duration > 1.0 {
-            println!("Command took {:.2}s", duration);
-        }
+        println!("\n{}\n", format!("Command took {}s", duration).green());
     }
     result
 }
@@ -68,6 +66,11 @@ pub fn execute_command_internal(command: &str, shell: &mut Shell) -> String {
         "help" => handle_help(&parts[1..]),
         "set-default" => set_as_default_shell(),
         "remove-default" => remove_default_shell(),
+        "pushd" => handle_pushd(&parts[1..], shell),
+        "popd" => handle_popd(shell),
+        "jobs" => handle_jobs(shell),
+        "history" => handle_history(shell),
+
         _ => execute_external_command(&parts),
     }
 }
@@ -161,6 +164,29 @@ fn remove_default_shell() -> String {
     }
 }
 
+fn handle_history(shell: &Shell) -> String {
+    if shell.history.is_empty() {
+        format!(
+            "{}No command history{}",
+            "[".bright_blue(),
+            "]".bright_blue()
+        )
+    } else {
+        format!(
+            "{}Command History:{}\n{}",
+            "[".bright_blue(),
+            "]".bright_blue(),
+            shell
+                .history
+                .iter()
+                .enumerate()
+                .map(|(i, cmd)| format!("{:5} {}", (i + 1).to_string().green(), cmd))
+                .collect::<Vec<_>>()
+                .join("\n")
+        )
+    }
+}
+
 fn change_directory(path: Option<&&str>) -> String {
     match path {
         Some(path) => {
@@ -196,7 +222,11 @@ fn handle_pushd(args: &[String], shell: &mut Shell) -> String {
         shell.push_dir(current);
         change_directory(Some(&dir.as_str()))
     } else {
-        "pushd: missing directory argument".to_string()
+        format!(
+            "{}pushd: missing directory argument{}",
+            "[".red(),
+            "]".red()
+        )
     }
 }
 
@@ -204,7 +234,7 @@ fn handle_popd(shell: &mut Shell) -> String {
     if let Some(dir) = shell.pop_dir() {
         change_directory(Some(&dir.as_str()))
     } else {
-        "popd: directory stack empty".to_string()
+        format!("{}popd: directory stack empty{}", "[".red(), "]".red())
     }
 }
 
@@ -213,8 +243,20 @@ fn handle_jobs(_shell: &mut Shell) -> String {
         .args(&["aux"])
         .output()
         .map(|output| String::from_utf8_lossy(&output.stdout).into_owned())
-        .unwrap_or_else(|_| "Failed to get process list".to_string());
-    processes
+        .unwrap_or_else(|e| {
+            format!(
+                "{}Failed to get process list: {}{}",
+                "[".red(),
+                e,
+                "]".red()
+            )
+        });
+    format!(
+        "{}Active Jobs:{}\n{}",
+        "[".bright_blue(),
+        "]".bright_blue(),
+        processes
+    )
 }
 
 fn list_directory(path: Option<&&str>) -> String {
@@ -237,16 +279,6 @@ fn list_directory(path: Option<&&str>) -> String {
             format!("{}Failed to list directory: {}{}", "[".red(), e, "]".red())
         }
     }
-}
-
-fn handle_history(shell: &Shell) -> String {
-    shell
-        .history
-        .iter()
-        .enumerate()
-        .map(|(i, cmd)| format!("{:5} {}", i + 1, cmd))
-        .collect::<Vec<_>>()
-        .join("\n")
 }
 
 fn create_directory(path: Option<&&str>) -> String {
@@ -377,19 +409,20 @@ fn handle_export(args: &[String], shell: &mut Shell) -> String {
     String::new()
 }
 
-pub fn handle_command_not_found(command: &str, shell: &Shell) -> String {
-    if let Some(suggestion) = shell.suggest_command(command) {
-        format!(
-            "Command '{}' not found. Did you mean '{}'?\nYou can run: {} {}",
-            command.red(),
-            suggestion.green(),
-            "help".bright_blue(),
-            suggestion.bright_blue()
-        )
-    } else {
-        format!(
-            "Command '{}' not found. Try 'help' for a list of commands.",
-            command.red()
-        )
-    }
-}
+// TODO: find a way to use this function
+// pub fn _handle_command_not_found(command: &str, shell: &Shell) -> String {
+//     if let Some(suggestion) = shell.suggest_command(command) {
+//         format!(
+//             "Command '{}' not found. Did you mean '{}'?\nYou can run: {} {}",
+//             command.red(),
+//             suggestion.green(),
+//             "help".bright_blue(),
+//             suggestion.bright_blue()
+//         )
+//     } else {
+//         format!(
+//             "Command '{}' not found. Try 'help' for a list of commands.",
+//             command.red()
+//         )
+//     }
+// }

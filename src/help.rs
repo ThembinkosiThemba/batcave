@@ -23,14 +23,41 @@ fn general_help() -> String {
     // Add ASCII art logo
     help.push_str(&format!("{}\n", LOGO.bright_purple()));
 
-    // Add main help header
     help.push_str(&format!(
         "{}\n",
         "Available Commands".bright_yellow().bold()
     ));
     help.push_str(&format!("{}\n\n", "==================".bright_yellow()));
 
-    // File Operations
+    help.push_str(&format!(
+        "\n{}\n",
+        "Directory Navigation:".bright_blue().bold()
+    ));
+    help.push_str(&format!(
+        "  {}    - Push directory to stack\n",
+        "pushd".green()
+    ));
+    help.push_str(&format!(
+        "  {}     - Pop directory from stack\n",
+        "popd".green()
+    ));
+
+    // Process Management
+    help.push_str(&format!(
+        "\n{}\n",
+        "Process Management:".bright_blue().bold()
+    ));
+    help.push_str(&format!("  {}     - List active jobs\n", "jobs".green()));
+
+    help.push_str(&format!(
+        "\n{}\n",
+        "History Management:".bright_blue().bold()
+    ));
+    help.push_str(&format!(
+        "  {}  - Show command history\n",
+        "history".green()
+    ));
+
     help.push_str(&format!("{}\n", "File Operations:".bright_blue().bold()));
     help.push_str(&format!(
         "  {}      - List directory contents\n",
@@ -48,7 +75,6 @@ fn general_help() -> String {
     ));
     help.push_str(&format!("  {}    - Create empty file\n", "touch".green()));
 
-    // Shell Management
     help.push_str(&format!("\n{}\n", "Shell Management:".bright_blue().bold()));
     help.push_str(&format!(
         "  {}    - Create .batcaverc config\n",
@@ -64,7 +90,6 @@ fn general_help() -> String {
     ));
     help.push_str(&format!("  {}    - Exit the shell\n", "exit".green()));
 
-    // Environment & Aliases
     help.push_str(&format!(
         "\n{}\n",
         "Environment & Aliases:".bright_blue().bold()
@@ -82,7 +107,6 @@ fn general_help() -> String {
         "env".green()
     ));
 
-    // System & Help
     help.push_str(&format!("\n{}\n", "System & Help:".bright_blue().bold()));
     help.push_str(&format!(
         "  {}     - Show system information\n",
@@ -97,7 +121,6 @@ fn general_help() -> String {
         "echo".green()
     ));
 
-    // Features
     help.push_str(&format!("\n{}\n", "Shell Features:".bright_blue().bold()));
     help.push_str(" • Command history (↑/↓ arrows)\n");
     help.push_str(" • Tab completion for commands & files\n");
@@ -112,6 +135,34 @@ fn general_help() -> String {
 
 fn command_specific_help(command: &str) -> String {
     let help_text = match command {
+        "pushd" => format!(
+            "{}\n{}\n\n{}\n  pushd /path/to/dir",
+            "pushd <directory>".bright_yellow().bold(),
+            "Push current directory to stack and change to new directory".bright_blue(),
+            "Example:".bright_green()
+        ),
+
+        "popd" => format!(
+            "{}\n{}\n\n{}\n  popd",
+            "popd".bright_yellow().bold(),
+            "Pop directory from stack and change to it".bright_blue(),
+            "Example:".bright_green()
+        ),
+
+        "jobs" => format!(
+            "{}\n{}\n\n{}\n  jobs",
+            "jobs".bright_yellow().bold(),
+            "List currently running background jobs".bright_blue(),
+            "Example:".bright_green()
+        ),
+
+        "history" => format!(
+            "{}\n{}\n\n{}\n  history",
+            "history".bright_yellow().bold(),
+            "Display command history".bright_blue(),
+            "Example:".bright_green()
+        ),
+
         "systeminfo" => format!(
             "{}\n{}\n\n{}\n  systeminfo on\n  systeminfo off\n  systeminfo status",
             "systeminfo [on|off|status]".bright_yellow().bold(),

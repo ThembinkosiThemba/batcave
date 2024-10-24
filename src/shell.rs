@@ -7,7 +7,6 @@ use std::{
 
 use colored::*;
 
-use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use rustyline::{
     completion::{Completer, Pair},
     error::ReadlineError,
@@ -66,30 +65,33 @@ impl Shell {
             .unwrap_or(true)
     }
 
-    // directory stack support
+    // Pushes current directory to stack
+    // Used for directory navigation
     pub fn push_dir(&mut self, dir: String) {
         self.dir_stack.push(dir)
     }
 
+    // Retrieves previous directory
+    // Used for directory navigation
     pub fn pop_dir(&mut self) -> Option<String> {
         self.dir_stack.pop()
     }
 
     // Add command suggestions
-    pub fn suggest_command(&self, failed_command: &str) -> Option<String> {
-        let known_commands = ["ls", "cd", "pwd", "mkdir", "rm", "touch", "help"];
-        let matcher = SkimMatcherV2::default();
+    // pub fn _suggest_command(&self, failed_command: &str) -> Option<String> {
+    //     let known_commands = ["ls", "cd", "pwd", "mkdir", "rm", "touch", "help"];
+    //     let matcher = SkimMatcherV2::default();
 
-        known_commands
-            .iter()
-            .filter_map(|&cmd| {
-                matcher
-                    .fuzzy_match(cmd, failed_command)
-                    .map(|score| (cmd, score))
-            })
-            .max_by_key(|&(_, score)| score)
-            .map(|(cmd, _)| cmd.to_string())
-    }
+    //     known_commands
+    //         .iter()
+    //         .filter_map(|&cmd| {
+    //             matcher
+    //                 .fuzzy_match(cmd, failed_command)
+    //                 .map(|score| (cmd, score))
+    //         })
+    //         .max_by_key(|&(_, score)| score)
+    //         .map(|(cmd, _)| cmd.to_string())
+    // }
 
     pub fn set_show_system_info(&mut self, show: bool) {
         self.set_env("SHOW_SYSTEM_INFO".to_string(), show.to_string());
