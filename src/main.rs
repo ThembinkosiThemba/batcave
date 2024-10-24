@@ -3,10 +3,10 @@
 // and includes features like environment variable management, command aliases,
 // and auto-completion.
 mod commands;
+mod help;
 mod shell;
 mod system;
 mod utils;
-mod help;
 
 use crate::commands::execute_command;
 use crate::shell::{Shell, ShellHelper};
@@ -22,16 +22,29 @@ use rustyline::{error::ReadlineError, Editor};
 fn main() -> io::Result<()> {
     setup_logging()?;
     print_banner();
-    
+
     let mut shell = Shell::new();
     let helper = ShellHelper::new(&shell);
     let mut rl = Editor::new().map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
     rl.set_helper(Some(helper));
-    
+
     shell.add_alias("ll".to_string(), "ls -la".to_string());
     shell.add_alias("cls".to_string(), "clear".to_string());
-    
-    println!("{}", system_info());
+
+    if shell.get_env("SHOW_SYSTEM_INFO").is_none() {
+        println!("\n{}", system_info());
+        println!(
+            "\nWould you like to see this system information every time you start the shell? [Y/n]"
+        );
+        let mut input = String::new();
+        io::stdin().read_line(&mut input)?;
+        let show_info = !input.trim().eq_ignore_ascii_case("n");
+        shell.set_show_system_info(show_info);
+        println!("\nPreference saved. You can change this later using the 'systeminfo' command.");
+    } else if shell.get_show_system_info() {
+        println!("\n{}", system_info());
+    }
+
     println!();
 
     loop {

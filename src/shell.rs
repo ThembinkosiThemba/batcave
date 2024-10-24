@@ -1,7 +1,11 @@
 use std::{
     collections::{HashMap, VecDeque},
-    env,
+    env, fs,
+    path::Path,
+    time::SystemTime,
 };
+
+use colored::*;
 
 use rustyline::{
     completion::{Completer, Pair},
@@ -20,19 +24,169 @@ pub struct Shell {
     pub env_vars: HashMap<String, String>,
     pub aliases: HashMap<String, String>,
     pub history: VecDeque<String>,
+    command_start_time: Option<SystemTime>,
+    dir_stack: Vec<String>,
 }
 
 impl Shell {
     // creates a new shell instance with the current environment variables
     pub fn new() -> Self {
-        let mut env_vars = HashMap::new();
-        for (key, value) in env::vars() {
-            env_vars.insert(key, value);
-        }
-        Shell {
-            env_vars,
+        let mut shell = Shell {
+            env_vars: HashMap::new(),
             aliases: HashMap::new(),
             history: VecDeque::with_capacity(1000),
+            command_start_time: None,
+            dir_stack: Vec::new(),
+        };
+
+        for (key, value) in env::vars() {
+            shell.env_vars.insert(key, value);
+        }
+
+        shell.ensure_config_exists();
+
+        shell.load_config();
+
+        shell
+    }
+
+    pub fn start_command_timer(&mut self) {
+        self.command_start_time = Some(SystemTime::now());
+    }
+
+    pub fn end_command_timer(&mut self) -> Option<f64> {
+        self.command_start_time
+            .and_then(|start| start.elapsed().ok().map(|duration| duration.as_secs_f64()))
+    }
+
+    pub fn get_show_system_info(&self) -> bool {
+        self.get_env("SHOW_SYSTEM_INFO")
+            .map(|val| val.to_lowercase() == "true")
+            .unwrap_or(true)
+    }
+
+    // Pushes current directory to stack
+    // Used for directory navigation
+    pub fn push_dir(&mut self, dir: String) {
+        self.dir_stack.push(dir)
+    }
+
+    // Retrieves previous directory
+    // Used for directory navigation
+    pub fn pop_dir(&mut self) -> Option<String> {
+        self.dir_stack.pop()
+    }
+
+    // Add command suggestions
+    // pub fn _suggest_command(&self, failed_command: &str) -> Option<String> {
+    //     let known_commands = ["ls", "cd", "pwd", "mkdir", "rm", "touch", "help"];
+    //     let matcher = SkimMatcherV2::default();
+
+    //     known_commands
+    //         .iter()
+    //         .filter_map(|&cmd| {
+    //             matcher
+    //                 .fuzzy_match(cmd, failed_command)
+    //                 .map(|score| (cmd, score))
+    //         })
+    //         .max_by_key(|&(_, score)| score)
+    //         .map(|(cmd, _)| cmd.to_string())
+    // }
+
+    pub fn set_show_system_info(&mut self, show: bool) {
+        self.set_env("SHOW_SYSTEM_INFO".to_string(), show.to_string());
+        if let Ok(home) = env::var("HOME") {
+            let config_path = format!("{}/.batcaverc", home);
+            if let Ok(content) = fs::read_to_string(&config_path) {
+                let mut new_lines = Vec::new();
+                let mut found = false;
+
+                for line in content.lines() {
+                    if line.trim().starts_with("export SHOW_SYSTEM_INFO=") {
+                        new_lines.push(format!("export SHOW_SYSTEM_INFO=\"{}\"", show));
+                        found = true;
+                    } else {
+                        new_lines.push(line.to_string());
+                    }
+                }
+
+                if !found {
+                    new_lines.push(format!("export SHOW_SYSTEM_INFO=\"{}\"", show));
+                }
+
+                let new_content = new_lines.join("\n");
+                let _ = fs::write(&config_path, new_content);
+            }
+        }
+    }
+
+    fn load_config(&mut self) {
+        if let Ok(home) = env::var("HOME") {
+            let config_path = format!("{}/.batcaverc", home);
+            if let Ok(content) = fs::read_to_string(&config_path) {
+                for line in content.lines() {
+                    let line = line.trim();
+                    if line.starts_with('#') || line.is_empty() {
+                        continue;
+                    }
+
+                    if line.starts_with("alias ") {
+                        if let Some(alias_def) = line.strip_prefix("alias ") {
+                            if let Some((name, command)) = alias_def.split_once('=') {
+                                let name = name.trim().to_string();
+                                let command = command.trim().trim_matches('"').to_string();
+                                self.add_alias(name, command);
+                            }
+                        }
+                    } else if line.starts_with("export ") {
+                        if let Some(export_def) = line.strip_prefix("export ") {
+                            if let Some((name, value)) = export_def.split_once('=') {
+                                let name = name.trim().to_string();
+                                let value = value.trim().trim_matches('"').to_string();
+                                self.set_env(name, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn ensure_config_exists(&self) {
+        let home = env::var("HOME").unwrap_or_else(|_| String::from("."));
+        let config_path = format!("{}/.batcaverc", home);
+
+        if !Path::new(&config_path).exists() {
+            let config_content = r#"# Batcave Shell Configuration
+
+# Default aliases
+alias ll="ls -la"
+alias cls="clear"
+alias gst="git status"
+alias gco="git checkout"
+
+# Environment variables
+export PATH="$HOME/.cargo/bin:$PATH"
+export EDITOR="vim"
+export TERM="xterm-256color"
+
+# Custom prompt settings
+export PS1="🦇 \w> "
+
+# Add your custom configurations below
+"#;
+
+            if let Ok(_) = fs::write(&config_path, config_content) {
+                println!(
+                    "{}",
+                    format!("Initialized configuration at {}", config_path).green()
+                );
+            } else {
+                eprintln!(
+                    "{}",
+                    format!("Failed to create configuration at {}", config_path).red()
+                );
+            }
         }
     }
 
